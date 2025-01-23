@@ -1,0 +1,891 @@
+API
+Stylebook
+
+OWASP Top 10
+
+Set of rules to enforce OWASP security guidelines. To use these rules:
+
+1. Go to your Stoplight workspace.
+2. Create a style guide project OR edit a project that has an API.
+3. Select Manage Style Guides.
+
+4. Enable guides.
+
+from list of public style
+
+
+You can then:
+
+Use the style guide as-is to automatically lint your API files
+Disable individual rules that do not follow your organization's standards
+Reuse and customize rules to meet your needs
+
+If you have suggestions on how to improve the ruleset or find any bugs, you can open an issue here.
+
+
+  owasp:api1:2019-no-numeric-ids
+Path parameters must use random IDs that cannot be guessed, such as UUIDs.
+
+Invalid Example
+
+In this example, the	parameter has a type
+of	.
+
+
+
+
+
+
+
+?
+
+
+
+
+
+
+Sign
+>
+in
+1 
+paths:
+2 '/users/{userId}':
+3 parameters:
+4 - schema:
+5 type: integer
+
+API
+Stylebook
+6 
+name: userId
+7 in: path
+8 required: true
+9 description: Id of an existing u
+
+
+Valid Example
+
+In this example, the	parameter has a type
+of	with a format of	.
+
+
+1paths:2'/users/{userId}':3parameters:4- schema:5type: string6format: uuid7name: userId8in: path9required: true10description: Id of an existingu
+
+
+  owasp:api2:2019-auth-insecure-schemes Security scheme must use a secure method.
+
+and	are considered to be
+insecure security schemes. Invalid Example
+This example is invalid because	is considered an insecure scheme.
+
+1 securitySchemes:
+2 Oauth1:
+3 type: http
+4 scheme: oauth
+
+Valid Example
+
+
+
+
+
+
+
+
+
+
+?
+
+
+
+
+
+
+
+
+Sign
+>
+in
+
+
+1 securitySchemes:
+2 Bearer:
+3 type: http
+4 scheme: bearer
+
+
+
+
+API
+Stylebook
+
+   owasp:api2:2019-jwt-best-practices
+Security scheme description must state that the implementation conforms with JSON Web Tokens RFC7519, the JSON Web Token standard.
+
+Invalid Example
+
+This example is invalid because RFC8726 is not included in the security scheme description.
+
+
+1 JWTBearer:
+2 type: oauth2
+3 flows:
+4 authorizationCode:
+5 ...
+6 ...
+7 ...
+8 ...
+9 description: A bearer token in the
+
+Valid Example
+
+
+1 JWTBearer:
+2 type: oauth2
+3 flows:
+4 authorizationCode:
+5 ...
+6 ...
+7 ...
+8 ...
+9 description: A bearer token in the
+
+
+
+   owasp:api2:2019-no-api-keys-in-url
+Security scheme must not contain API Keys in query parameters.
+API Keys are (usually opaque) strings that can be eavesdropped, especially when they are passed as URL parameters.
+
+Invalid Example
+
+
+
+
+
+?
+
+
+
+Sign
+>
+in
+
+The
+
+1
+
+setting makes this example invalid.
+
+securitySchemes:
+
+API
+Stylebook
+2 
+API Key:
+3 name: API Key
+4 type: apiKey
+5 in: query
+
+
+Valid Example
+
+The	makes this example valid.
+
+1 securitySchemes:
+2 API Key:
+3 name: API Key
+4 type: apiKey
+5 in: header
+
+
+
+   owasp:api2:2019-no-credentials-in-url
+Path parameter must not contain credentials, such as API key, password, or secret.
+
+Invalid Example
+
+This example is invalid because the path parameter
+includes a string with the name	.
+
+1 paths:
+2 '/user/{password}':
+3 parameters:
+4 - schema:
+5 type: string
+6 format: password
+7 name: password
+8 in: path
+9 required: true
+
+Valid Example
+
+Remove the invalid path parameter.
+
+1 paths:
+2 '/user/
+
+
+
+
+
+
+
+?
+
+
+
+Sign
+>
+in
+
+   owasp:api2:2019-no-http-basic
+Security scheme must not use basic auth. Use a more secure authentication method, such as OAuth
+
+API
+Stylebook
+
+2.0.
+
+Invalid Example
+
+
+
+1 securitySchemes:
+2 basicAuth:
+3 type: http
+4 scheme: basic
+
+Valid Example
+
+
+1 securitySchemes:
+2 OAuth2:
+3 type: oauth2
+4 flows:
+5 ...
+6 ...
+7 ...
+8 ...
+9 ...
+
+
+
+   owasp:api2:2019-protection-global-unsafe
+POST. PUT, PATCH, and DELETE operations must be protected by a security scheme at either the global level or operation level.
+Security rules are defined in the section.
+
+Valid Example: Global
+
+
+1 securitySchemes:
+2 API Key:
+3 name: API Key
+4 type: apiKey
+5 in: header
+6 security:
+7 - API Key: []
+
+*Valid Example: Operation
+
+
+
+
+
+
+?
+
+
+
+
+Sign
+>
+in
+
+
+1 paths:
+2 '/users/{userId}':
+3 patch:
+4 ...
+
+API
+Stylebook
+5 
+responses:
+6 ...
+7 security:
+8 - API Key: []
+
+
+
+
+
+  owasp:api4:2019-array-limit
+Array size should be limited to mitigate resource exhaustion attacks. This can be done using
+  . You should ensure that the subschema in is constrained too.
+
+
+  owasp:api4:2019-integer-format
+Integers should be limited to mitigate resource exhaustion attacks. Specifying whether int32 or
+int64 is expected via	.
+
+
+  owasp:api4:2019-integer-limit
+Array size should be limited to mitigate resource exhaustion attacks. This can be done using
+  . You should ensure that the subschema in is constrained too.
+
+
+   owasp:api4:2019-integer-limit-legacy
+Array size should be limited to mitigate resource exhaustion attacks. This can be done using
+  . You should ensure that the subschema in is constrained too.
+
+
+  owasp:api4:2019-rate-limit
+Headers for 2xx and 4 xx responses must contain
+,	,
+, or	.
+
+Proper rate limits avoid attackers overloading the API. There are many ways to implement rate-limiting, but most of them involve using HTTP headers, and there are two popular ways to do that:
+
+
+
+
+?
+
+
+Sign
+>
+in
+
+IETF Draft HTTP RateLimit Headers:. https://datatracker.ietf.org/doc/draft-ietf-httpapi-
+
+API
+Stylebook
+
+ratelimit-headers/
+Customer headers like X-Rate-Limit-Limit (Twitter: https://developer.twitter.com/en/docs/twitter- api/rate-limits) or X-RateLimit-Limit (GitHub: https://docs.github.com/en/rest/overview/resources- in-the-rest-api)
+
+Invalid Example
+
+The 200 response does not contain rate-limiting headers.
+
+
+1 responses:
+2 '200':
+3 description: User Not Found
+
+Valid Example
+
+The 200 response contains rate-limiting headers.
+
+1 responses:
+2	'200':
+3 headers:
+4 RateLimit-Limit:
+5 description: The number of allow
+6 schema:
+7 type: integer
+8 RateLimit-Reset:
+9 description: The number of secon
+10 schema:
+11 type: integer
+
+
+
+  owasp:api4:2019-rate-limit-retry-after Headers for 429 responses must contain
+.
+
+Invalid Example
+
+
+
+
+
+
+
+
+
+?
+
+
+
+
+
+
+
+Sign
+>
+in
+
+
+1	'429':
+2 description: Too Many Requests
+3 headers:
+4 RateLimit-Limit:
+5 ...
+6 RateLimit-Reset:
+
+API
+Stylebook
+
+7
+
+
+Valid Example
+
+...
+
+
+
+1	'429':
+2 headers:
+3 RateLimit-Limit:
+4 ...
+5 RateLimit-Reset:
+6 ...
+7 Retry-After:
+8 description: The number of seconds
+9 schema:
+10 type: integer
+
+
+
+   owasp:api4:2019-string-limit
+String size should be limited to mitigate resource exhaustion attacks. This can be done using
+.
+
+
+   owasp:api4:2019-string-restricted
+To avoid unexpected values being sent or leaked, ensure that strings have either a format or a RegEx
+pattern. This can be done using	or
+.
+
+
+owasp:api3:2019-define-error-responses-401 Operation must have a 401 response defined.
+
+Invalid Example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sign
+>
+in
+
+
+1	get:
+2	summary: Get User Info by User ID
+3	tags: []
+4	responses:
+5	'200':
+6	...
+7	'400':
+8	...
+9	'501':
+10 description: Bad Gateway
+11 headers:
+12 ...
+
+API
+Stylebook
+
+Valid Example
+
+1	get:
+2	summary: Get User Info by User ID
+3	tags: []
+4	responses:
+5	'200':
+6	...
+7	'400':
+8	...
+9	'429':
+10 ...
+11	'401':
+12 description: Not Authenticated
+13 headers:
+14 ...
+
+
+
+owasp:api3:2019-define-error-responses-500 Operation must have a response defined.
+
+Invalid Example
+
+
+1get:2summary: Get User Info by UserID3tags: []4responses:5'200':6...7'400':8...9'501':10description: Bad Gateway11headers:12...
+Valid Example
+
+
+
+
+
+
+
+
+
+
+
+Sign
+?	>
+in
+
+API
+Stylebook
+
+10	...
+11	'500':
+12 description: Internal Server Error
+13 headers:
+14 ...
+
+
+
+
+
+owasp:api3:2019-define-error-validation Operation must have a 400, 422 or 4xx response defined.
+
+Invalid Example
+
+
+1get:2summary: Get User Info byUser ID3tags: []4responses:5'200':6...7'404':8description: User NotFound9headers:10...
+Valid Example
+
+
+1get:2summary: Get User Info byUser ID3tags: []4responses:5'200':6...7'400':8 description: Bad Request
+9 headers:
+10 ...
+
+
+
+owasp:api4:2019-rate-limit-responses-429 Operation must have a 429 response defined.
+
+Invalid Example
+
+
+
+
+
+
+?
+
+
+
+
+Sign
+>
+in
+
+
+1	get:
+2	summary: Get User Info by User ID
+3	tags: []
+4	responses:
+
+API
+Stylebook
+
+5	'200':
+6	...
+7	'400':
+8	...
+9	'431':
+10 description: Request Header Fields
+11 headers:
+12 ...
+
+
+Valid Example
+
+
+1	get:
+2	summary: Get User Info by User ID
+3	tags: []
+4	responses:
+5	'200':
+6	...
+7	'400':
+8	...
+9	'429':
+10 description: Too Many Requests
+11 headers:
+12 ...
+
+
+
+owasp:api6:2019-constrained- additionalProperties
+By default JSON Schema allows additional
+properties, which can potentially lead to mass assignment issues, where unspecified fields are passed to the API without validation.
+
+
+owasp:api6:2019-no-additionalProperties Object should not allow for additional properties,
+which can allow unspecified fields passed to the API without validation.
+
+Invalid Example
+
+
+In this example, on the object.
+
+are allowed
+
+
+
+
+
+
+?
+
+
+
+Sign
+>
+in
+1 
+schemas:
+2 User:
+3 type: object
+
+API
+Stylebook
+4 
+title: User
+5 additionalProperties: true
+6 properties:
+7 id:
+8 type: integer
+9 firstName:
+10 type: string
+11 lastName:
+12 type: string
+
+
+Valid Example
+
+
+In this example, allowed on the object.
+
+are not
+
+
+1 schemas:
+2 User:
+3 type: object
+4 title: User
+5 description: ''
+6 additionalProperties: false
+7 properties:
+8 id:
+9 type: integer
+10 firstName:
+11 type: string
+12 lastName:
+13 type: string
+
+
+
+   owasp:api2:2019-protection-global-safe
+GET and HEAD operations should be protected by a security scheme at either the global level or operation level.
+Security rules are defined in the section.
+
+Valid Example: Global
+
+
+
+
+
+
+
+
+
+
+
+?
+
+
+
+
+
+
+
+
+
+Sign
+>
+in
+
+
+1 securitySchemes:
+2 API Key:
+3 name: API Key
+4 type: apiKey
+5 in: header
+6 security:
+
+API
+Stylebook
+7 
+- API Key: []
+
+*Valid Example: Operation
+
+
+1 paths:
+2 '/users/{userId}':
+3 get:
+4 ...
+5 responses:
+6 ...
+7 security:
+8 - API Key: []
+
+
+
+  owasp:api2:2019-protection-global-unsafe-strict POST, PATCH, DELETE, and PUT operations should be protected by a security scheme at either the global level or operation level.
+Security rules are defined in the section.
+
+Invalid Example
+
+The PATCH operation has an empty security value so it is not protected.
+
+1 paths:
+2 '/users/{userId}':
+3 patch:
+4 ...
+5 responses:
+6 ...
+7 security:
+8 - []
+
+Valid Example
+
+The PATCH operation is protected by the API Key. As an alternative, remove the empty security setting at the operation level and use global security.
+
+
+
+
+
+?
+
+
+
+Sign
+>
+in
+1 
+paths:
+2 '/users/{userId}':
+3 patch:
+
+API
+Stylebook
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+?
+
+
+Sign
+>
+in
+
+
+
+
+
+
+
+
